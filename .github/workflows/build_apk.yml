@@ -28,7 +28,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential git python3-pip python3-dev autoconf libtool pkg-config libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev automake zip unzip wget zlib1g-dev ccache libltdl-dev
+        sudo apt-get install -y build-essential git python3-pip python3-dev autoconf libtool pkg-config libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev automake zip unzip wget zlib1g-dev ccache libltdl-dev
         echo "✅ 系统依赖安装完成"
 
     - name: Install Python dependencies
@@ -41,11 +41,19 @@ jobs:
 
     - name: Build APK
       run: |
+        set -o pipefail
         cd android
         ls -la
         yes | buildozer android sdkmanager --licenses || true
-        buildozer android debug 2>&1 | tee build.log | tail -150
+        buildozer android debug 2>&1 | tee build.log | tail -200
+        echo ""
         ls -la bin/ 2>/dev/null || echo "bin目录不存在"
+        if [ ! -f bin/*.apk ]; then
+          echo "❌ 错误：APK文件未生成！"
+          tail -100 build.log
+          exit 1
+        fi
+        echo "✅ APK构建成功！"
 
     - name: Upload build log on failure
       if: failure()
