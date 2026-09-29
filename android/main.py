@@ -23,13 +23,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.clock import Clock
 from kivy.core.window import Window
 
-try:
-    import pyzipper
-except ImportError:
-    try:
-        import zipfile as pyzipper
-    except ImportError:
-        pyzipper = None
+import zipfile
 
 
 # 字符集预设
@@ -76,7 +70,7 @@ def brute_generator(charset, min_len, max_len):
 def try_password(zip_path, pwd):
     """尝试单个密码"""
     try:
-        with pyzipper.AESZipFile(zip_path) as zf:
+        with zipfile.ZipFile(zip_path) as zf:
             zf.setpassword(pwd.encode('utf-8'))
             for info in zf.infolist():
                 with zf.open(info) as f:
@@ -279,9 +273,7 @@ class ZipCrackerLayout(BoxLayout):
                 self.status_label.text = '错误：文件不存在'
                 return
 
-            if pyzipper is None:
-                self.status_label.text = '错误：pyzipper未安装'
-                return
+            
 
             mode = 'mask' if self.mode_spinner.text == '掩码攻击' else 'brute'
 
