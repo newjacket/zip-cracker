@@ -14,6 +14,15 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Increase swap memory
+      run: |
+        sudo fallocate -l 8G /swapfile
+        sudo chmod 600 /swapfile
+        sudo mkswap /swapfile
+        sudo swapon /swapfile
+        echo "✅ 交换内存已增加到8GB"
+        free -h
+
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
@@ -44,7 +53,7 @@ jobs:
         set -o pipefail
         cd android
         ls -la
-        echo "🔨 开始构建APK（首次会自动下载Android SDK/NDK，约需20-40分钟）..."
+        echo "🔨 开始构建APK..."
         buildozer android debug 2>&1 | tee build.log | tail -200
         echo ""
         ls -la bin/ 2>/dev/null || echo "bin目录不存在"
